@@ -1,0 +1,21 @@
+{
+    "name": "rabbit-loader/php-sdk",
+    "type": "library",
+    "description": "PHP SDK for optimizing websites with RabbitLoader",
+    "homepage": "https://github.com/rabbit-loader/php-sdk",
+    "require": {
+        "php": ">=5.6"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "RabbitLoader\\SDK\\" : "src/"
+        }
+    },
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "RabbitLoader",
+            "homepage": "https://rabbitloader.com"
+        }
+    ]
+}
