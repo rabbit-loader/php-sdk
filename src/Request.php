@@ -112,10 +112,6 @@ class Request
      */
     private function parse()
     {
-        if (!empty($this->requestURL)) {
-            return;
-        }
-
         $rm = Util::getRequestMethod();
         if (strcasecmp($rm, 'get') !== 0) {
             $this->ignoreRequest("request-method-$rm");

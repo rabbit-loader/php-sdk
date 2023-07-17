@@ -230,6 +230,6 @@ class Cache
 
     public function getCacheCount()
     {
-        return $this->file->countFiles($this->rootDir);
+        return $this->file->countFiles($this->rootDir . self::TTL_LONG);
     }
 }
