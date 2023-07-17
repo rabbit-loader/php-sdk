@@ -63,7 +63,7 @@ class RabbitLoader
      * @param string $url - The page for which content os changed
      * @param string $variant - The variant (same as used by setVariant())
      */
-    public function onContentChange($url, $variant=[])
+    public function onContentChange($url, $variant = [])
     {
         $cacheFile = new Cache($url, $this->storageDirectory);
         $cacheFile->setDebug($this->debug);
@@ -71,6 +71,21 @@ class RabbitLoader
         return $cacheFile->invalidate();
     }
 
+    /**
+     * Delete cached file if exists for a given URL
+     * @return int deleted cache count
+     */
+    public function delete($url)
+    {
+        $cacheFile = new Cache($url, $this->storageDirectory);
+        $cacheFile->setDebug($this->debug);
+        return $cacheFile->delete(0);
+    }
+
+    /**
+     * Delete all cached files and returns the count
+     * @return int deleted cache count
+     */
     public function deleteAll()
     {
         $cacheFile = new Cache('', $this->storageDirectory);
@@ -84,7 +99,18 @@ class RabbitLoader
      * If a page has two variants, based on currency and viewer device, this can be set - setVariant(["currency"=>"USD", "screen"=>"MOBILE"]) or setVariant(["currency"=>"GBP", "screen"=>"DESKTOP"])
      * setVariant must be called before process()
      */
-    public function setVariant($variant){
+    public function setVariant($variant)
+    {
         $this->request->setVariant($variant);
+    }
+
+    /**
+     * Returns the number of URLs for which cache exists
+     */
+    public function getCacheCount()
+    {
+        $cacheFile = new Cache('', $this->storageDirectory);
+        $cacheFile->setDebug($this->debug);
+        return $cacheFile->getCacheCount();
     }
 }

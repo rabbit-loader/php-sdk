@@ -14,7 +14,7 @@ Example use, assuming index.php is the file that handles all traffic for the web
 #load vendor/autoload.php
 
 #integrate RabbitLoader
-$licenseKey = 'YOUR_JLICENSE_KEY'; //get your license key from environment variable
+$licenseKey = 'YOUR_LICENSE_KEY'; //get your license key from environment variable
 $storageDir = '/cache-disk/rabbitloader'; //storage location where cached files will be stored
 $rlSDK = new RabbitLoader\SDK\RabbitLoader($licenseKey, $storageDir);
 $rlSDK->process();

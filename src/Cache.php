@@ -25,17 +25,24 @@ class Cache
         }
 
         $this->rootDir = $this->rootDir . DIRECTORY_SEPARATOR;
+        $this->file  = new File();
 
         if (!is_dir($this->rootDir . self::TTL_LONG)) {
-            mkdir($this->rootDir . self::TTL_LONG, 0777, true);
+            if (!mkdir($this->rootDir . self::TTL_LONG, 0777, true)) {
+                error_log("rabbitloader failed to create cache directory inside " . $this->rootDir);
+            }
         }
         if (!is_dir($this->rootDir . self::TTL_SHORT)) {
-            mkdir($this->rootDir . self::TTL_SHORT, 0777, true);
+            if (!mkdir($this->rootDir . self::TTL_SHORT, 0777, true)) {
+                error_log("rabbitloader failed to create cache directory inside " . $this->rootDir);
+            } else {
+                //directory created successfully
+                $this->addHtaccess();
+            }
         }
 
         $hash = md5($this->request_url);
         $this->setPath($hash);
-        $this->file  = new File();
     }
 
     /**
@@ -47,6 +54,16 @@ class Cache
         $this->file->setDebug($debug);
     }
 
+    private function addHtaccess()
+    {
+        $loc = $this->rootDir . ".htaccess";
+        if (!file_exists($loc)) {
+            $content = "deny from all";
+            $this->file->fpc($loc, $content);
+        }
+
+        return file_exists($loc);
+    }
     public function exists($ttl, $shouldBeAfter = 0)
     {
         $fp = $ttl == self::TTL_LONG ? $this->fp_long . '_c' : $this->fp_short . '_c';
@@ -89,8 +106,10 @@ class Cache
 
     public function deleteAll()
     {
-        $this->file->cleanDir($this->rootDir . self::TTL_LONG, 0, 0);
-        $this->file->cleanDir($this->rootDir . self::TTL_SHORT, 0, 0);
+        $count = 0;
+        $count += $this->file->cleanDir($this->rootDir . self::TTL_LONG, 0, 0);
+        $count += $this->file->cleanDir($this->rootDir . self::TTL_SHORT, 0, 0);
+        return $count;
     }
 
     public function invalidate()
@@ -100,8 +119,11 @@ class Cache
             $content = file_get_contents($fp);
             if ($content !== false) {
                 $content = str_ireplace(['"rlCacheRebuild": "N"', '"rlCacheRebuild":"N"'], '"rlCacheRebuild": "Y"', $content);
+                $re = '/const rlOriginalPageTime(.*);/U';
+                $subst = 'const rlOriginalPage = new Date("' . date('c') . '");';
+                $content = preg_replace($re, $subst, $content);
+                $this->file->fpc($fp, $content);
             }
-            $this->file->fpc($fp, $content);
         }
     }
 
@@ -190,17 +212,24 @@ class Cache
         return $headers_sent;
     }
 
-    public function setPath($hash){
+    public function setPath($hash)
+    {
         $this->fp_long =  $this->rootDir . self::TTL_LONG . DIRECTORY_SEPARATOR . $hash;
         $this->fp_short =  $this->rootDir . self::TTL_SHORT . DIRECTORY_SEPARATOR . $hash;
     }
 
-    public function setVariant($variant){
-        if(empty($variant) || !is_array($variant)){
+    public function setVariant($variant)
+    {
+        if (empty($variant) || !is_array($variant)) {
             return;
         }
         ksort($variant);
-        $hash = md5($this->request_url.json_encode($variant));
+        $hash = md5($this->request_url . json_encode($variant));
         $this->setPath($hash);
+    }
+
+    public function getCacheCount()
+    {
+        return $this->file->countFiles($this->rootDir);
     }
 }

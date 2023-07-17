@@ -14,6 +14,7 @@ class Request
     private bool $ignoreRead = false;
     private bool $ignoreWrite = false;
     private string $ignoreReason = 'default';
+    private bool $isNoOptimization = false;
     private bool $isWarmup = false;
     private int $onlyAfter = 0;
 
@@ -125,27 +126,28 @@ class Request
             list($urlpart, $qspart) = array_pad(explode('?', $_SERVER['REQUEST_URI']), 2, '');
             parse_str($qspart, $qsvars);
 
-            if(isset($qsvars['rl-no-optimization'])){
+            if (isset($qsvars['rl-no-optimization'])) {
                 unset($qsvars['rl-no-optimization']);
+                $this->isNoOptimization = true;
                 $this->ignoreRequest("no-optimization");
             }
 
-            if(isset($qsvars['rl-warmup'])){
+            if (isset($qsvars['rl-warmup'])) {
                 unset($qsvars['rl-warmup']);
                 $this->ignoreRead = true;
                 $this->isWarmup = true;
             }
-            
-            if(isset($qsvars['rltest'])){
+
+            if (isset($qsvars['rltest'])) {
                 $this->ignoreRead = false;
                 unset($qsvars['rltest']);
             }
 
-            if(isset($qsvars['rl-rand'])){
+            if (isset($qsvars['rl-rand'])) {
                 unset($qsvars['rl-rand']);
             }
 
-            if(isset($qsvars['rl-only-after'])){
+            if (isset($qsvars['rl-only-after'])) {
                 $this->onlyAfter = ($qsvars['rl-only-after'] / 1000);
                 unset($qsvars['rl-only-after']);
             }
@@ -178,17 +180,22 @@ class Request
             if ($this->cacheFile->serve()) {
                 exit;
             }
-        }else if($this->isWarmup){
-            if($this->cacheFile->exists(Cache::TTL_LONG, $this->onlyAfter)){
+        } else if ($this->isWarmup) {
+            if ($this->cacheFile->exists(Cache::TTL_LONG, $this->onlyAfter)) {
                 Util::sendHeader('x-rl-cache: fresh', true);
                 exit;
-            }else{
+            } else {
                 Util::sendHeader('x-rl-cache: stale', true);
             }
         } else {
             Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
         }
 
+        if ($this->isNoOptimization || $this->isWarmup) {
+            Util::sendHeader('Cache-Control: no-store, no-cache, must-revalidate, max-age=0', true);
+            Util::sendHeader('Cache-Control: post-check=0, pre-check=0', false);
+            Util::sendHeader('Pragma: no-cache', true);
+        }
         if (!$this->ignoreWrite) {
             ob_start([$this, 'save']);
         }
@@ -197,15 +204,15 @@ class Request
     public function save($buffer)
     {
         $code = http_response_code();
-        if($code!=200){
-            $this->ignoreRequest('status-'.$code);
+        if ($code != 200) {
+            $this->ignoreRequest('status-' . $code);
         }
 
         if ($this->ignoreWrite) {
             Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
             return $buffer;
         }
-        
+
         if ($buffer !== false) {
             try {
                 $bom = pack('H*', 'EFBBBF');
@@ -227,10 +234,10 @@ class Request
                 if ($isHtml && !$isAmp) {
                     $this->appendFooter($buffer);
                     $this->cacheFile->save(Cache::TTL_SHORT, $buffer, $headers);
-                    if($this->isWarmup){
+                    if ($this->isWarmup) {
                         $this->refresh($this->requestURL, true);
                     }
-                }else{
+                } else {
                     if ($this->debug) {
                         Util::sendHeader("x-rl-page: $isHtml $isAmp", true);
                     }
@@ -252,7 +259,7 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        Util::append($buffer, '<script data-rlskip="1">const rlOriginalPageTime=new Date("'.date('c').'");!function(e,a){var r="searchParams",i="append",l="getTime",n=e.rlPageData||{},t=n.rlCached;a.cookie="rlCached="+(t?"1":"0")+"; path=/;";let g=new Date,c="Y"==n.rlCacheRebuild,m=n.exp?new Date(n.exp):g,o=m.getFullYear()>1970&&m[l]()-g[l]()<0;(!t||c||o)&&setTimeout(function e(){var a=new URL(location.href);a[r][i]("rl-warmup","1"),a[r][i]("rl-rand",g.getTime()),a[r][i]("rl-only-after",("object"==typeof rlOriginalPageTime?rlOriginalPageTime:g).getTime()),fetch(a)},1e3)}(this,document);</script></body>');
+        Util::append($buffer, '<script data-rlskip="1">const rlOriginalPageTime=new Date("' . date('c') . '");!function(e,a){var r="searchParams",i="append",l="getTime",n=e.rlPageData||{},t=n.rlCached;a.cookie="rlCached="+(t?"1":"0")+"; path=/;";let g=new Date,c="Y"==n.rlCacheRebuild,m=n.exp?new Date(n.exp):g,o=m.getFullYear()>1970&&m[l]()-g[l]()<0;(!t||c||o)&&setTimeout(function e(){var a=new URL(location.href);a[r][i]("rl-warmup","1"),a[r][i]("rl-rand",g.getTime()),a[r][i]("rl-only-after",("object"==typeof rlOriginalPageTime?rlOriginalPageTime:g).getTime()),fetch(a)},1e3)}(this,document);</script></body>');
     }
 
     public function process()
@@ -267,13 +274,14 @@ class Request
         $api->setDebug($this->debug);
         $response = $api->refresh($this->cacheFile, $url, $force);
         $this->cacheFile->collectGarbage(strtotime('-5 minutes'));
-        if($this->debug){
-            Util::sendHeader('x-rl-debug-refresh:'.json_encode($response), true);
+        if ($this->debug) {
+            Util::sendHeader('x-rl-debug-refresh:' . json_encode($response), true);
         }
         exit;
     }
 
-    public function setVariant($variant){
+    public function setVariant($variant)
+    {
         $this->cacheFile->setVariant($variant);
     }
 }
