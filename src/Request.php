@@ -17,6 +17,7 @@ class Request
     private bool $isNoOptimization = false;
     private bool $isWarmup = false;
     private int $onlyAfter = 0;
+    private $purgeCallback = null;
 
     public function __construct($licenseKey, $rootDir)
     {
@@ -175,6 +176,8 @@ class Request
         if (!$this->ignoreRead) {
             if ($this->cacheFile->serve()) {
                 exit;
+            }else{
+                Util::sendHeader('x-rl-cache: miss', true);
             }
         } else if ($this->isWarmup) {
             if ($this->cacheFile->exists(Cache::TTL_LONG, $this->onlyAfter)) {
@@ -229,8 +232,8 @@ class Request
                 $isAmp = preg_match("/<html.*?\s(amp|⚡)(\s|=|>)/", $buffer);
                 if ($isHtml && !$isAmp) {
                     $this->appendFooter($buffer);
-                    $this->cacheFile->save(Cache::TTL_SHORT, $buffer, $headers);
                     if ($this->isWarmup) {
+                        $this->cacheFile->save(Cache::TTL_SHORT, $buffer, $headers);
                         $this->refresh($this->requestURL, true);
                     }
                 } else {
@@ -273,11 +276,23 @@ class Request
         if ($this->debug) {
             Util::sendHeader('x-rl-debug-refresh:' . json_encode($response), true);
         }
+        if(!empty($response['saved']) && !empty($this->purgeCallback)){
+            call_user_func_array($this->purgeCallback, [$url]);
+        }
         exit;
     }
 
     public function setVariant($variant)
     {
         $this->cacheFile->setVariant($variant);
+    }
+
+    public function isWarmUp()
+    {
+        return $this->isWarmup;
+    }
+
+    public function registerPurgeCallback($cb){
+        $this->purgeCallback = $cb;
     }
 }

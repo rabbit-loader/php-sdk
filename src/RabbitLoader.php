@@ -72,6 +72,14 @@ class RabbitLoader
     }
 
     /**
+     * Purge external systems when RabbitLoader updates a page
+     * Example - $cb = function($url){//do purge}
+     */
+    public function registerPurgeCallback($cb){
+        $this->request->registerPurgeCallback($cb);
+    }
+
+    /**
      * Delete cached file if exists for a given URL
      * @return int deleted cache count
      */
@@ -112,5 +120,13 @@ class RabbitLoader
         $cacheFile = new Cache('', $this->storageDirectory);
         $cacheFile->setDebug($this->debug);
         return $cacheFile->getCacheCount();
+    }
+
+    /**
+     * Returns if the page was warmup
+     */
+    public function isWarmUp()
+    {
+        return $this->request->isWarmUp();
     }
 }
