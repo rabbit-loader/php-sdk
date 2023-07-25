@@ -44,6 +44,7 @@ class Request
         $this->ignoreRead = true;
         $this->ignoreWrite = true;
         $this->ignoreReason = $reason;
+        Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
     }
 
     public function skipForCookies($cookieNames)
@@ -176,7 +177,7 @@ class Request
         if (!$this->ignoreRead) {
             if ($this->cacheFile->serve()) {
                 exit;
-            }else{
+            } else {
                 Util::sendHeader('x-rl-cache: miss', true);
             }
         } else if ($this->isWarmup) {
@@ -195,21 +196,18 @@ class Request
             Util::sendHeader('Cache-Control: post-check=0, pre-check=0', false);
             Util::sendHeader('Pragma: no-cache', true);
         }
-        if (!$this->ignoreWrite) {
-            ob_start([$this, 'save']);
-        }
+
+        ob_start([$this, 'addFooter']);
     }
 
-    public function save($buffer)
+    /**
+     * Saves buffer and append footer to all requests
+     */
+    public function addFooter($buffer)
     {
         $code = http_response_code();
         if ($code != 200) {
             $this->ignoreRequest('status-' . $code);
-        }
-
-        if ($this->ignoreWrite) {
-            Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
-            return $buffer;
         }
 
         if ($buffer !== false) {
@@ -276,7 +274,7 @@ class Request
         if ($this->debug) {
             Util::sendHeader('x-rl-debug-refresh:' . json_encode($response), true);
         }
-        if(!empty($response['saved']) && !empty($this->purgeCallback)){
+        if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
         }
         exit;
@@ -292,7 +290,8 @@ class Request
         return $this->isWarmup;
     }
 
-    public function registerPurgeCallback($cb){
+    public function registerPurgeCallback($cb)
+    {
         $this->purgeCallback = $cb;
     }
 }
