@@ -230,7 +230,7 @@ class Request
                 $isAmp = preg_match("/<html.*?\s(amp|⚡)(\s|=|>)/", $buffer);
                 if ($isHtml && !$isAmp) {
                     $this->appendFooter($buffer);
-                    if ($this->isWarmup) {
+                    if ($this->isWarmup && !$this->ignoreWrite) {
                         $this->cacheFile->save(Cache::TTL_SHORT, $buffer, $headers);
                         $this->refresh($this->requestURL, true);
                     }
