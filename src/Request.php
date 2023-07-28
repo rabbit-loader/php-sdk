@@ -276,6 +276,8 @@ class Request
         }
         if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
+        } else if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
+            $this->cacheFile->deleteAll();
         }
         exit;
     }

@@ -33,7 +33,7 @@ class API
             Util::sendHeader('x-rl-refresh: start', true);
         }
         $response = [
-            'url'=>$url
+            'url' => $url
         ];
         try {
             if (!$cf->exists(Cache::TTL_SHORT)) {
@@ -61,7 +61,7 @@ class API
                 $response['saved'] = $cf->save(Cache::TTL_LONG, $result['data']['html'], $result['data']['headers']);
                 $response['deleted'] = $cf->delete(Cache::TTL_SHORT);
             } else {
-                $response['error'] = $result;
+                $response = $result;
             }
         } catch (\Throwable $e) {
             Exc:: catch($e);
