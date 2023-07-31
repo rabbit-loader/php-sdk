@@ -13,7 +13,7 @@ class Request
     private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
     private bool $ignoreRead = false;
     private bool $ignoreWrite = false;
-    private string $ignoreReason = 'default';
+    private string $ignoreReason = '';
     private bool $isNoOptimization = false;
     private bool $isWarmup = false;
     private int $onlyAfter = 0;
@@ -39,7 +39,7 @@ class Request
         return $this->requestURL;
     }
 
-    public function ignoreRequest($reason = '')
+    public function ignoreRequest($reason = 'default')
     {
         $this->ignoreRead = true;
         $this->ignoreWrite = true;
@@ -256,7 +256,7 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        Util::append($buffer, '<script data-rlskip="1">const rlOriginalPageTime=new Date("' . date('c') . '");!function(e,a){var r="searchParams",i="append",l="getTime",n=e.rlPageData||{},t=n.rlCached;a.cookie="rlCached="+(t?"1":"0")+"; path=/;";let g=new Date,c="Y"==n.rlCacheRebuild,m=n.exp?new Date(n.exp):g,o=m.getFullYear()>1970&&m[l]()-g[l]()<0;(!t||c||o)&&setTimeout(function e(){var a=new URL(location.href);a[r][i]("rl-warmup","1"),a[r][i]("rl-rand",g.getTime()),a[r][i]("rl-only-after",("object"==typeof rlOriginalPageTime?rlOriginalPageTime:g).getTime()),fetch(a)},1e3)}(this,document);</script></body>');
+        Util::append($buffer, '<script data-rlskip="1">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script></body>');
     }
 
     public function process()
