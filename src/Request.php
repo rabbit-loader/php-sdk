@@ -4,20 +4,21 @@ namespace RabbitLoader\SDK;
 
 class Request
 {
-    private string $licenseKey = '';
+    private $licenseKey = '';
     private $requestURL = "";
     private $requestURI = "";
-    private Cache $cacheFile;
-    private bool $debug = false;
-    private string $rootDir = '';
-    private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
-    private bool $ignoreRead = false;
-    private bool $ignoreWrite = false;
-    private string $ignoreReason = '';
-    private bool $isNoOptimization = false;
-    private bool $isWarmup = false;
-    private int $onlyAfter = 0;
+    private $cacheFile = null;
+    private $debug = false;
+    private $rootDir = '';
+    private $ignoreRead = false;
+    private $ignoreWrite = false;
+    private $ignoreReason = '';
+    private $isNoOptimization = false;
+    private $isWarmup = false;
+    private $onlyAfter = 0;
     private $purgeCallback = null;
+
+    private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
     public function __construct($licenseKey, $rootDir)
     {

@@ -8,12 +8,12 @@ class Cache
     public const TTL_LONG = "long";
     public const TTL_SHORT = "short";
 
-    private string $request_url = '';
+    private $request_url = '';
     private $fp_long = '';
     private $fp_short = '';
     private $debug = false;
-    private string $rootDir = '';
-    private File $file;
+    private $rootDir = '';
+    private $file;
 
     public function __construct($request_url, $rootDir)
     {

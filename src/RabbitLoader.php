@@ -4,9 +4,9 @@ namespace RabbitLoader\SDK;
 
 class RabbitLoader
 {
-    private string $storageDirectory;
-    private bool $debug = false;
-    private Request $request;
+    private $storageDirectory = '';
+    private $debug = false;
+    private $request;
 
     public function __construct($licenseKey, $storageDirectory = '/tmp/rabbitloader')
     {
@@ -75,7 +75,8 @@ class RabbitLoader
      * Purge external systems when RabbitLoader updates a page
      * Example - $cb = function($url){//do purge}
      */
-    public function registerPurgeCallback($cb){
+    public function registerPurgeCallback($cb)
+    {
         $this->request->registerPurgeCallback($cb);
     }
 

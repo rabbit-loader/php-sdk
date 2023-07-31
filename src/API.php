@@ -6,9 +6,9 @@ namespace RabbitLoader\SDK;
 class API
 {
 
-    private string $host = '';
-    private string $licenseKey = '';
-    private bool $debug = false;
+    private $host = '';
+    private $licenseKey = '';
+    private $debug = false;
 
     public function __construct($licenseKey)
     {
