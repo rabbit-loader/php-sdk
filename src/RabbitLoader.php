@@ -88,7 +88,7 @@ class RabbitLoader
     {
         $cacheFile = new Cache($url, $this->storageDirectory);
         $cacheFile->setDebug($this->debug);
-        return $cacheFile->delete(0);
+        return $cacheFile->delete(Cache::TTL_LONG);
     }
 
     /**
