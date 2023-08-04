@@ -19,9 +19,12 @@ class Util
     public static function append(&$body, $element)
     {
         $replaced = 0;
-        $body = str_ireplace('</body>', $element, $body, $replaced);
-        if(!$replaced){
-            $body = str_ireplace('</html>', $element, $body, $replaced);
+        $body = str_ireplace('</head>', $element . '</head>', $body, $replaced);
+        if (!$replaced) {
+            $body = str_ireplace('</body>', $element . '</body>', $body, $replaced);
+        }
+        if (!$replaced) {
+            $body = str_ireplace('</html>', $element . '</html>', $body, $replaced);
         }
     }
 }

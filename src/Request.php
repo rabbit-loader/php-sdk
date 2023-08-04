@@ -257,7 +257,7 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        Util::append($buffer, '<script data-rlskip="1">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script></body>');
+        Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
     }
 
     public function process()
