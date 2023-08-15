@@ -211,7 +211,14 @@ class Request
             $this->ignoreRequest('status-' . $code);
         }
 
-        if ($buffer !== false) {
+        $validBuffer = is_string($buffer);
+        if ($this->debug) {
+            $bufferLen = $validBuffer ? strlen($buffer) : 0;
+            $level = ob_get_level();
+            Util::sendHeader("x-rl-buffer: LN:$bufferLen LV:$level", false);
+        }
+
+        if ($validBuffer) {
             try {
                 $bom = pack('H*', 'EFBBBF');
                 if ($bom !== false) {
@@ -229,16 +236,17 @@ class Request
                 }
                 $isHtml = $contentType && stripos($contentType, 'text/html') !== false;
                 $isAmp = preg_match("/<html.*?\s(amp|⚡)(\s|=|>)/", $buffer);
+
                 if ($isHtml && !$isAmp) {
                     $this->appendFooter($buffer);
                     if ($this->isWarmup && !$this->ignoreWrite) {
                         $this->cacheFile->save(Cache::TTL_SHORT, $buffer, $headers);
                         $this->refresh($this->requestURL, true);
                     }
-                } else {
-                    if ($this->debug) {
-                        Util::sendHeader("x-rl-page: $isHtml $isAmp", true);
-                    }
+                }
+
+                if ($this->debug) {
+                    Util::sendHeader("x-rl-page: H:$isHtml A:$isAmp", false);
                 }
             } catch (\Throwable $e) {
                 if ($this->debug) {
@@ -257,7 +265,11 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
+        $appended = Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
+
+        if ($this->debug) {
+            Util::sendHeader("x-rl-footer: $appended", false);
+        }
     }
 
     public function process()

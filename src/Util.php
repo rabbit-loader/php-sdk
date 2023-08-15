@@ -26,5 +26,6 @@ class Util
         if (!$replaced) {
             $body = str_ireplace('</html>', $element . '</html>', $body, $replaced);
         }
+        return  $replaced > 0;
     }
 }
