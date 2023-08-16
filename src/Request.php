@@ -131,6 +131,12 @@ class Request
                 $this->ignoreRequest("no-optimization");
             }
 
+            if (isset($qsvars['norl'])) {
+                unset($qsvars['norl']);
+                $this->isNoOptimization = true;
+                $this->ignoreRequest("no-optimization");
+            }
+
             if (isset($qsvars['rl-warmup'])) {
                 unset($qsvars['rl-warmup']);
                 $this->ignoreRead = true;
