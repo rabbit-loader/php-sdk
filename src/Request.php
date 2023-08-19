@@ -125,6 +125,7 @@ class Request
             list($urlpart, $qspart) = array_pad(explode('?', $_SERVER['REQUEST_URI']), 2, '');
             parse_str($qspart, $qsvars);
 
+            $varsLenO = count($qsvars);
             if (isset($qsvars['rl-no-optimization'])) {
                 unset($qsvars['rl-no-optimization']);
                 $this->isNoOptimization = true;
@@ -157,8 +158,11 @@ class Request
                 unset($qsvars['rl-only-after']);
             }
 
-            $newqs = http_build_query($qsvars);
-            $_SERVER['REQUEST_URI'] = $urlpart . (empty($newqs) ?  '' : '?' . $newqs);
+            $varsLenM = count($qsvars);
+            if ($varsLenO != $varsLenM) {
+                $newqs = http_build_query($qsvars);
+                $_SERVER['REQUEST_URI'] = $urlpart . (empty($newqs) ?  '' : '?' . $newqs);
+            }
         }
         $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
