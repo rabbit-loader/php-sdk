@@ -192,7 +192,10 @@ class Request
                 Util::sendHeader('x-rl-cache: miss', true);
             }
         } else if ($this->isWarmup) {
-            if ($this->cacheFile->exists(Cache::TTL_LONG, $this->onlyAfter)) {
+            if ($this->cacheFile->fresh(Cache::TTL_LONG, $this->onlyAfter)) {
+                if (!empty($this->purgeCallback)) {
+                    call_user_func_array($this->purgeCallback, [$this->getURL()]);
+                }
                 Util::sendHeader('x-rl-cache: fresh', true);
                 exit;
             } else {
@@ -275,7 +278,7 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        $appended = Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,a,r,l){var n="searchParams",t="append",c="getTime",h=e.rlPageData||{},i=h.rlCached;a.cookie="rlCached="+(i?"1":"0")+"; path=/;";let o=new Date,d="Y"==h.rlCacheRebuild,p=h.exp?new Date(h.exp):o,$=p.getFullYear()>1970&&p[c]()-o[c]()<0;(!i||d||$)&&!r&&setTimeout(function e(){let a=new Date(l);var r=new URL(location.href);r[n][t]("rl-warmup","1"),r[n][t]("rl-rand",o[c]()),r[n][t]("rl-only-after",a[c]()),fetch(r)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
+        $appended = Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,r,a,n){var t="searchParams",l="append",i="getTime",o=e.rlPageData||{},d=o.rlCached;r.cookie="rlCached="+(d?"1":"0")+"; path=/;";let c=new Date;function f(e){if(!e)return;let r=new Date(e);return r&&r.getFullYear()>1970&&r<c}let h=f(o.exp),u=f(o.rlModified);(!d||h||u)&&!a&&setTimeout(function e(){let r=new Date(u?o.rlModified:n);var a=new URL(location.href);a[t][l]("rl-warmup","1"),a[t][l]("rl-rand",c[i]()),a[t][l]("rl-only-after",r[i]()),fetch(a)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
 
         if ($this->debug) {
             Util::sendHeader("x-rl-footer: $appended", false);
@@ -302,6 +305,7 @@ class Request
         } else if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
             $this->cacheFile->deleteAll();
         }
+        ob_flush();
         exit;
     }
 

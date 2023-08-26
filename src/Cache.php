@@ -64,26 +64,37 @@ class Cache
 
         return file_exists($loc);
     }
-    public function exists($ttl, $shouldBeAfter = 0)
+
+    private function getPathForTTL($ttl, $fileType)
     {
-        $fp = $ttl == self::TTL_LONG ? $this->fp_long . '_c' : $this->fp_short . '_c';
-        $fe = file_exists($fp);
-        if ($fe && $shouldBeAfter && $shouldBeAfter > 631152000) {
+        return $ttl == self::TTL_LONG ? $this->fp_long . '_' . $fileType : $this->fp_short . '_' . $fileType;
+    }
+
+    public function exists($ttl)
+    {
+        return file_exists($this->getPathForTTL($ttl, 'c'));
+    }
+
+    public function fresh($ttl, $ts)
+    {
+        $fp = $this->getPathForTTL($ttl, 'c');
+        if ($this->exists($ttl) && $ts && $ts > 631152000) {
             $mt = filemtime($fp);
-            if ($mt && $mt < $shouldBeAfter) {
-                //post is modified after cache was generated
-                $fe = false;
+            if ($this->debug) {
+                Util::sendHeader('x-rl-fresh: ' . $mt . '>' . $ts, true);
+            }
+            if ($mt && $mt > $ts) {
+                return true;
             }
         }
-        return $fe;
+        return false;
     }
 
     public function delete($ttl)
     {
-        $fp = $ttl == self::TTL_LONG ? $this->fp_long : $this->fp_short;
         $count = 0;
-        $fc = $fp . '_c';
-        $fh = $fp . '_h';
+        $fc = $this->getPathForTTL($ttl, 'c');
+        $fh = $this->getPathForTTL($ttl, 'h');
 
         if (is_file($fc) && (($this->debug && unlink($fc)) || @unlink($fc))) {
             $count++;
@@ -114,14 +125,11 @@ class Cache
 
     public function invalidate()
     {
-        $fp = $this->fp_long . '_c';
+        $fp = $this->getPathForTTL(self::TTL_LONG, 'c');
         if (is_file($fp)) {
             $content = file_get_contents($fp);
             if ($content !== false) {
-                $content = str_ireplace(['"rlCacheRebuild": "N"', '"rlCacheRebuild":"N"'], '"rlCacheRebuild": "Y"', $content);
-                $re = '/const rlOriginalPageTime(.*);/U';
-                $subst = 'const rlOriginalPage = new Date("' . date('c') . '");';
-                $content = preg_replace($re, $subst, $content);
+                $content = str_ireplace(['"rlModified":""', '"rlModified": ""'], '"rlModified": "' . date('c') . '"', $content);
                 $this->file->fpc($fp, $content);
             }
         }
@@ -130,10 +138,10 @@ class Cache
 
     public function &get($ttl, $type)
     {
-        $fp = $ttl == self::TTL_LONG ? $this->fp_long : $this->fp_short;
+        $fp = $this->getPathForTTL($ttl, $type);
         $content = '';
-        if (file_exists($fp . '_' . $type)) {
-            $content = file_get_contents($fp . '_' . $type);
+        if (file_exists($fp)) {
+            $content = file_get_contents($fp);
         }
         return $content;
     }
@@ -141,12 +149,12 @@ class Cache
     public function serve()
     {
         if ($this->exists(self::TTL_LONG)) {
-            $content = file_get_contents($this->fp_long . '_c');
+            $content = file_get_contents($this->getPathForTTL(self::TTL_LONG, 'c'));
             if ($content !== false) {
                 if ($this->valid($content)) {
-                    if (file_exists($this->fp_long . '_h')) {
+                    if (file_exists($this->getPathForTTL(self::TTL_LONG, 'h'))) {
                         //header is optional
-                        $this->sendHeaders(file_get_contents($this->fp_long . '_h'));
+                        $this->sendHeaders(file_get_contents($this->getPathForTTL(self::TTL_LONG, 'h')));
                     }
                     Util::sendHeader('x-rl-cache: hit', true);
                     echo $content;
@@ -163,13 +171,13 @@ class Cache
         if (!$this->valid($content)) {
             return $count;
         }
-        $fp = $ttl == self::TTL_LONG ? $this->fp_long : $this->fp_short;
-        $headers = json_encode($headers, JSON_INVALID_UTF8_IGNORE);
 
-        if ($this->file->fpc($fp . '_h', $headers)) {
+        $headers = json_encode($headers, JSON_INVALID_UTF8_IGNORE);
+        if ($this->file->fpc($this->getPathForTTL($ttl, 'h'), $headers)) {
             $count++;
         }
-        if ($this->file->fpc($fp . '_c', $content)) {
+
+        if ($this->file->fpc($this->getPathForTTL($ttl, 'c'), $content)) {
             $count++;
         }
         return $count;

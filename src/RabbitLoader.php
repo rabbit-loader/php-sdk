@@ -2,6 +2,10 @@
 
 namespace RabbitLoader\SDK;
 
+if (!defined('JSON_INVALID_UTF8_IGNORE')) {
+    define('JSON_INVALID_UTF8_IGNORE', 0); //@since PHP 7.2
+}
+
 class RabbitLoader
 {
     private $storageDirectory = '';
