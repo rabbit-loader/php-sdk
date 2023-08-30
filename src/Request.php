@@ -278,7 +278,7 @@ class Request
 
     private function appendFooter(&$buffer)
     {
-        $appended = Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,r,a,n){var t="searchParams",l="append",i="getTime",o=e.rlPageData||{},d=o.rlCached;r.cookie="rlCached="+(d?"1":"0")+"; path=/;";let c=new Date;function f(e){if(!e)return;let r=new Date(e);return r&&r.getFullYear()>1970&&r<c}let h=f(o.exp),u=f(o.rlModified);(!d||h||u)&&!a&&setTimeout(function e(){let r=new Date(u?o.rlModified:n);var a=new URL(location.href);a[t][l]("rl-warmup","1"),a[t][l]("rl-rand",c[i]()),a[t][l]("rl-only-after",r[i]()),fetch(a)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
+        $appended = Util::append($buffer, '<script data-rlskip="1" id="rl-sdk-js-0">!function(e,r,a,t){var n="searchParams",l="append",i="getTime",o="Date",d=e.rlPageData||{},f=d.rlCached;r.cookie="rlCached="+(f?"1":"0")+"; path=/;";let c=new e[o];function h(r){if(!r)return;let a=new e[o](r);return a&&a.getFullYear()>1970&&a<c}let u=h(d.exp),p=h(d.rlModified);(!f||u||p)&&!a&&setTimeout(function r(){let a=new e[o](p?d.rlModified:t);if(u){let f=new e[o](d.exp);f>a&&(a=f)}var h=new URL(location.href);h[n][l]("rl-warmup","1"),h[n][l]("rl-rand",c[i]()),h[n][l]("rl-only-after",a[i]()),fetch(h)},1e3)}(this,document,"' . $this->ignoreReason . '","' . date('c') . '");</script>');
 
         if ($this->debug) {
             Util::sendHeader("x-rl-footer: $appended", false);
