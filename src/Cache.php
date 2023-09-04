@@ -108,7 +108,7 @@ class Cache
     public function collectGarbage($mtime)
     {
         $lock = $this->rootDir . 'garbage.lock';
-        if (!$this->file->lock($lock, $mtime)) {
+        if (!$this->file->lockForTime($lock, $mtime)) {
             return;
         }
         $this->file->cleanDir($this->rootDir . self::TTL_LONG, 500, 30 * 24 * 3600);
@@ -239,5 +239,16 @@ class Cache
     public function getCacheCount()
     {
         return $this->file->countFiles($this->rootDir . self::TTL_LONG);
+    }
+
+    public function setBQE()
+    {
+        $lock = $this->rootDir . 'bqe.lock';
+        return $this->file->lock($lock);
+    }
+    public function getBQE()
+    {
+        $lock = $this->rootDir . 'bqe.lock';
+        return $this->file->isLocked($lock, strtotime('-15 minutes'));
     }
 }

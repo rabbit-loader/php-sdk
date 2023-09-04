@@ -89,6 +89,7 @@ class API
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
         curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_ENCODING, ''); //Curl automatically sends the appropriate header based on the supported algorithms, and automatically decodes the response.
 
         if ($ignoreSSL) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);

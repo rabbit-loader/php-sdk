@@ -50,18 +50,44 @@ class File
         return $deleted_count;
     }
 
-    public function lock($fp, $mtime)
+    public function lockForTime($fp, $mtime)
     {
         try {
             if (file_exists($fp) && filemtime($fp) > $mtime) {
                 return false;
             }
+            return $this->lock($fp);
+        } catch (\Throwable $e) {
+            Exc:: catch($e);
+        } catch (\Exception $e) {
+            Exc:: catch($e);
+        }
+    }
+
+    public function lock($fp)
+    {
+        try {
             return touch($fp);
         } catch (\Throwable $e) {
             Exc:: catch($e);
         } catch (\Exception $e) {
             Exc:: catch($e);
         }
+    }
+
+    public function isLocked($fp, $mtime)
+    {
+        try {
+            if (file_exists($fp) && filemtime($fp) > $mtime) {
+                return true;
+            }
+            return false;
+        } catch (\Throwable $e) {
+            Exc:: catch($e);
+        } catch (\Exception $e) {
+            Exc:: catch($e);
+        }
+        return false;
     }
 
     public function countFiles($dir)

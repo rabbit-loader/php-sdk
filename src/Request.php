@@ -293,16 +293,29 @@ class Request
 
     private function refresh($url, $force)
     {
+        if ($this->cacheFile->getBQE()) {
+            if ($this->debug) {
+                Util::sendHeader('x-rl-bqe: 1', true);
+            }
+            return;
+        }
+
         $api = new API($this->licenseKey);
         $api->setDebug($this->debug);
         $response = $api->refresh($this->cacheFile, $url, $force);
         $this->cacheFile->collectGarbage(strtotime('-5 minutes'));
         if ($this->debug) {
-            Util::sendHeader('x-rl-debug-refresh:' . json_encode($response), true);
+            $resJson = json_encode($response);
+            if ($resJson) {
+                Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
+            } else {
+                Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
+            }
         }
         if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
         } else if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
+            $this->cacheFile->setBQE();
             $this->cacheFile->deleteAll();
         }
         ob_flush();
