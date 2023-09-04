@@ -185,13 +185,7 @@ class Request
 
     private function serve()
     {
-        if (!$this->ignoreRead) {
-            if ($this->cacheFile->serve()) {
-                exit;
-            } else {
-                Util::sendHeader('x-rl-cache: miss', true);
-            }
-        } else if ($this->isWarmup) {
+        if ($this->isWarmup) {
             if ($this->cacheFile->fresh(Cache::TTL_LONG, $this->onlyAfter)) {
                 if (!empty($this->purgeCallback)) {
                     call_user_func_array($this->purgeCallback, [$this->getURL()]);
@@ -202,7 +196,15 @@ class Request
                 Util::sendHeader('x-rl-cache: stale', true);
             }
         } else {
-            Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
+            if ($this->ignoreRead) {
+                Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
+            } else {
+                if ($this->cacheFile->serve()) {
+                    exit;
+                } else {
+                    Util::sendHeader('x-rl-cache: miss', true);
+                }
+            }
         }
 
         if ($this->isNoOptimization || $this->isWarmup) {
