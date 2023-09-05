@@ -130,32 +130,38 @@ class Request
                 unset($qsvars['rl-no-optimization']);
                 $this->isNoOptimization = true;
                 $this->ignoreRequest("no-optimization");
+                unset($_GET['rl-no-optimization']);
             }
 
             if (isset($qsvars['norl'])) {
                 unset($qsvars['norl']);
                 $this->isNoOptimization = true;
                 $this->ignoreRequest("no-optimization");
+                unset($_GET['norl']);
             }
 
             if (isset($qsvars['rl-warmup'])) {
                 unset($qsvars['rl-warmup']);
                 $this->ignoreRead = true;
                 $this->isWarmup = true;
+                unset($_GET['rl-warmup']);
             }
 
             if (isset($qsvars['rltest'])) {
                 $this->ignoreRead = false;
                 unset($qsvars['rltest']);
+                unset($_GET['rltest']);
             }
 
             if (isset($qsvars['rl-rand'])) {
                 unset($qsvars['rl-rand']);
+                unset($_GET['rl-rand']);
             }
 
             if (isset($qsvars['rl-only-after'])) {
                 $this->onlyAfter = ($qsvars['rl-only-after'] / 1000);
                 unset($qsvars['rl-only-after']);
+                unset($_GET['rl-only-after']);
             }
 
             $varsLenM = count($qsvars);
