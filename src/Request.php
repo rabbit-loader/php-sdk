@@ -326,7 +326,6 @@ class Request
             $this->cacheFile->setBQE();
             $this->cacheFile->deleteAll();
         }
-        ob_flush();
         exit;
     }
 
