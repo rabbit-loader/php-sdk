@@ -2,8 +2,18 @@
 
 namespace RabbitLoader\SDK;
 
+/**
+ * Polyfills
+ */
 if (!defined('JSON_INVALID_UTF8_IGNORE')) {
     define('JSON_INVALID_UTF8_IGNORE', 0); //@since PHP 7.2
+}
+
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle)
+    {
+        return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+    }
 }
 
 class RabbitLoader

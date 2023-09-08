@@ -14,6 +14,7 @@ class Cache
     private $debug = false;
     private $rootDir = '';
     private $file;
+    private $rlCacheRebuildFlag = '"rlCacheRebuild": "Y"';
 
     public function __construct($request_url, $rootDir)
     {
@@ -78,12 +79,18 @@ class Cache
     public function fresh($ttl, $ts)
     {
         $fp = $this->getPathForTTL($ttl, 'c');
-        if ($this->exists($ttl) && $ts && $ts > 631152000) {
+        if ($this->exists($ttl) && $ts && ($ts > 631152000)) {
             $mt = filemtime($fp);
             if ($this->debug) {
+                Util::sendHeader('x-rl-mtime: ' . $mt, true);
                 Util::sendHeader('x-rl-fresh: ' . $mt . '>' . $ts, true);
+                Util::sendHeader('x-rl-fpc: ' . $fp, false);
             }
-            if ($mt && $mt > $ts) {
+            if ($mt && ($mt > $ts)) {
+                $content = file_get_contents($fp);
+                if ($content === false || str_contains($content, $this->rlCacheRebuildFlag)) {
+                    return false;
+                }
                 return true;
             }
         }
@@ -129,7 +136,8 @@ class Cache
         if (is_file($fp)) {
             $content = file_get_contents($fp);
             if ($content !== false) {
-                $content = str_ireplace(['"rlModified":""', '"rlModified": ""'], '"rlModified": "' . date('c') . '"', $content);
+                $rlModified = '"rlModified": "' . date('c') . '"';
+                $content = str_ireplace(['"rlCacheRebuild":"N"', '"rlCacheRebuild": "N"', '"rlModified":""', '"rlModified": ""'], [$this->rlCacheRebuildFlag, $this->rlCacheRebuildFlag, $rlModified, $rlModified], $content);
                 $this->file->fpc($fp, $content);
             }
         }
