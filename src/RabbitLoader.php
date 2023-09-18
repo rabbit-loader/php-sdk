@@ -26,12 +26,14 @@ class RabbitLoader
     {
         $this->storageDirectory = $storageDirectory;
         $this->request = new Request($licenseKey, $this->storageDirectory);
+        Exc::setFile($this->storageDirectory, false);
     }
 
     public function setDebug($debug)
     {
         $this->debug = $debug;
         $this->request->setDebug($this->debug);
+        Exc::setFile($this->storageDirectory, $this->debug);
     }
 
     /**

@@ -5,9 +5,11 @@ namespace RabbitLoader\SDK;
 class File
 {
     private $debug = false;
+    private $fp = '/';
 
-    public function __construct()
+    public function __construct($fp = '')
     {
+        $this->fp  = $fp;
     }
 
     public function setDebug($debug)
@@ -25,6 +27,19 @@ class File
         }
         if (!$file_updated && $this->debug) {
             throw new \Exception("could not write file $fp");
+        }
+        return $file_updated;
+    }
+
+    public function fac(&$data)
+    {
+        if ($this->debug) {
+            $file_updated = file_put_contents($this->fp, $data, LOCK_EX | FILE_APPEND);
+        } else {
+            $file_updated = @file_put_contents($this->fp, $data, LOCK_EX | FILE_APPEND);
+        }
+        if (!$file_updated && $this->debug) {
+            throw new \Exception("could not write file $this->fp");
         }
         return $file_updated;
     }

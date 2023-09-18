@@ -295,8 +295,14 @@ class Request
 
     public function process()
     {
-        $this->serve();
-        $this->cacheFile->collectGarbage(strtotime('-1 hour'));
+        try {
+            $this->serve();
+            $this->cacheFile->collectGarbage(strtotime('-1 hour'));
+        } catch (\Throwable $e) {
+            Exc:: catch($e);
+        } catch (\Exception $e) {
+            Exc:: catch($e);
+        }
     }
 
     private function refresh($url, $force)
