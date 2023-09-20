@@ -146,4 +146,12 @@ class RabbitLoader
     {
         return $this->request->isWarmUp();
     }
+
+    /**
+     * Activate ME mode
+     */
+    public function setMeMode()
+    {
+        return $this->request->setMeMode();
+    }
 }

@@ -17,6 +17,8 @@ class Request
     private $isWarmup = false;
     private $onlyAfter = 0;
     private $purgeCallback = null;
+    private $meMode = false;
+    private $rlTest = false;
 
     private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
@@ -148,7 +150,7 @@ class Request
             }
 
             if (isset($qsvars['rltest'])) {
-                $this->ignoreRead = false;
+                $this->rlTest = true;
                 unset($qsvars['rltest']);
                 unset($_GET['rltest']);
             }
@@ -202,7 +204,9 @@ class Request
                 Util::sendHeader('x-rl-cache: stale', true);
             }
         } else {
-            if ($this->ignoreRead) {
+            if ($this->meMode && !$this->rlTest) {
+                Util::sendHeader('x-rl-skip: me-mode', true);
+            } else if ($this->ignoreRead) {
                 Util::sendHeader('x-rl-skip: ' . $this->ignoreReason, true);
             } else {
                 if ($this->cacheFile->serve()) {
@@ -348,5 +352,10 @@ class Request
     public function registerPurgeCallback($cb)
     {
         $this->purgeCallback = $cb;
+    }
+
+    public function setMeMode()
+    {
+        return $this->meMode = true;
     }
 }
