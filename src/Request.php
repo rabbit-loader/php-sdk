@@ -259,7 +259,7 @@ class Request
                         $contentType = $p[1];
                     }
                 }
-                $isHtml = $contentType && stripos($contentType, 'text/html') !== false;
+                $isHtml = ($contentType && stripos($contentType, 'text/html') !== false);
                 $isAmp = preg_match("/<html.*?\s(amp|⚡)(\s|=|>)/", $buffer);
 
                 if ($isHtml && !$isAmp) {
