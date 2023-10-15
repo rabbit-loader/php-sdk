@@ -249,14 +249,14 @@ class Cache
         return $this->file->countFiles($this->rootDir . self::TTL_LONG);
     }
 
-    public function setBQE()
+    public function set429()
     {
-        $lock = $this->rootDir . 'bqe.lock';
+        $lock = $this->rootDir . '429.lock';
         return $this->file->lock($lock);
     }
-    public function getBQE()
+    public function get429()
     {
-        $lock = $this->rootDir . 'bqe.lock';
+        $lock = $this->rootDir . '429.lock';
         return $this->file->isLocked($lock, strtotime('-15 minutes'));
     }
 }
