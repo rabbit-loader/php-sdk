@@ -311,9 +311,9 @@ class Request
 
     private function refresh($url, $force)
     {
-        if ($this->cacheFile->getBQE()) {
+        if ($this->cacheFile->get429()) {
             if ($this->debug) {
-                Util::sendHeader('x-rl-bqe: 1', true);
+                Util::sendHeader('x-rl-429: 1', true);
             }
             return;
         }
@@ -332,9 +332,11 @@ class Request
         }
         if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
-        } else if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
-            $this->cacheFile->setBQE();
-            $this->cacheFile->deleteAll();
+        } else {
+            $this->cacheFile->set429();
+            if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
+                $this->cacheFile->deleteAll();
+            }
         }
         exit;
     }
