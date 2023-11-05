@@ -107,6 +107,9 @@ class File
 
     public function countFiles($dir)
     {
+        if (!is_dir($dir)) {
+            return 0;
+        }
         $fi = new \FilesystemIterator($dir, \FilesystemIterator::SKIP_DOTS);
         $fcount = iterator_count($fi) / 2; ///2 cause content and header
         return round($fcount);

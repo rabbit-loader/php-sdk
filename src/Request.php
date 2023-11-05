@@ -301,7 +301,6 @@ class Request
     {
         try {
             $this->serve();
-            $this->cacheFile->collectGarbage(strtotime('-1 hour'));
         } catch (\Throwable $e) {
             Exc:: catch($e);
         } catch (\Exception $e) {

@@ -19,28 +19,9 @@ class Cache
     public function __construct($request_url, $rootDir)
     {
         $this->request_url = $request_url;
-        $this->rootDir = rtrim($rootDir, DIRECTORY_SEPARATOR);
-
-        if (!is_dir($this->rootDir)) {
-            mkdir($this->rootDir, 0777, true);
-        }
-
-        $this->rootDir = $this->rootDir . DIRECTORY_SEPARATOR;
+        $this->rootDir = rtrim($rootDir, DIRECTORY_SEPARATOR); //sep may or may not exist
+        $this->rootDir = $this->rootDir . DIRECTORY_SEPARATOR; //ensure sep is always there
         $this->file  = new File();
-
-        if (!is_dir($this->rootDir . self::TTL_LONG)) {
-            if (!mkdir($this->rootDir . self::TTL_LONG, 0777, true)) {
-                error_log("rabbitloader failed to create cache directory inside " . $this->rootDir);
-            }
-        }
-        if (!is_dir($this->rootDir . self::TTL_SHORT)) {
-            if (!mkdir($this->rootDir . self::TTL_SHORT, 0777, true)) {
-                error_log("rabbitloader failed to create cache directory inside " . $this->rootDir);
-            } else {
-                //directory created successfully
-                $this->addHtaccess();
-            }
-        }
 
         $hash = md5($this->request_url);
         $this->setPath($hash);
@@ -53,6 +34,30 @@ class Cache
     {
         $this->debug = $debug;
         $this->file->setDebug($debug);
+    }
+
+    private function createDirs()
+    {
+        $rootDir = rtrim($this->rootDir, DIRECTORY_SEPARATOR);
+        if (!is_dir($rootDir)) {
+            mkdir($rootDir, 0775, true);
+        }
+
+        $rootDir = $rootDir . DIRECTORY_SEPARATOR;
+
+        if (!is_dir($rootDir . self::TTL_LONG)) {
+            if (!mkdir($rootDir . self::TTL_LONG, 0775, true)) {
+                error_log("rabbitloader failed to create cache directory inside " . $rootDir);
+            }
+        }
+        if (!is_dir($rootDir . self::TTL_SHORT)) {
+            if (!mkdir($rootDir . self::TTL_SHORT, 0775, true)) {
+                error_log("rabbitloader failed to create cache directory inside " . $rootDir);
+            } else {
+                //directory created successfully
+                $this->addHtaccess();
+            }
+        }
     }
 
     private function addHtaccess()
@@ -114,6 +119,7 @@ class Cache
 
     public function collectGarbage($mtime)
     {
+        $this->createDirs();
         $lock = $this->rootDir . 'garbage.lock';
         if (!$this->file->lockForTime($lock, $mtime)) {
             return;
@@ -179,7 +185,7 @@ class Cache
         if (!$this->valid($content)) {
             return $count;
         }
-
+        $this->createDirs();
         $headers = json_encode($headers, JSON_INVALID_UTF8_IGNORE);
         if ($this->file->fpc($this->getPathForTTL($ttl, 'h'), $headers)) {
             $count++;
