@@ -52,11 +52,12 @@ class API
             if (empty($html)) {
                 return;
             }
-            $this->remote('page/get_cache', [
+            $fields = [
                 'url_b64' => base64_encode($url),
                 'html' => $html,
                 'headers' => $headers
-            ], $result, $httpCode);
+            ];
+            $this->remote('page/get_cache', $fields, $result, $httpCode);
             if (!empty($result['data']['html'])) {
                 $response['saved'] = $cf->save(Cache::TTL_LONG, $result['data']['html'], $result['data']['headers']);
                 $response['deleted'] = $cf->delete(Cache::TTL_SHORT);
@@ -72,7 +73,7 @@ class API
         return $response;
     }
 
-    private function remote($endpoint, $fields, &$result, &$httpCode)
+    private function remote($endpoint, &$fields, &$result, &$httpCode)
     {
         $ignoreSSL = true;
         $url = $this->host . 'api/v1/' . $endpoint;
@@ -110,5 +111,13 @@ class API
             echo "Failed to decode JSON $response";
         }
         return true;
+    }
+
+    public function heartbeat()
+    {
+        $data = [
+            'error_log' => Exc::get()
+        ];
+        //$this->remote('domain/heartbeat', $data, $result, $httpCode);
     }
 }

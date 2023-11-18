@@ -46,4 +46,9 @@ class Exc extends \Exception
             }
         }
     }
+
+    public static function get()
+    {
+        return file_get_contents(self::$log, false, null, 0, 5000);
+    }
 }

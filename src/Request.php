@@ -320,7 +320,9 @@ class Request
         $api = new API($this->licenseKey);
         $api->setDebug($this->debug);
         $response = $api->refresh($this->cacheFile, $url, $force);
-        $this->cacheFile->collectGarbage(strtotime('-5 minutes'));
+        if ($this->cacheFile->collectGarbage(strtotime('-5 minutes'))) {
+            $api->heartbeat();
+        }
         if ($this->debug) {
             $resJson = json_encode($response);
             if ($resJson) {

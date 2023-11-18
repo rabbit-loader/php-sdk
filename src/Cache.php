@@ -122,10 +122,11 @@ class Cache
         $this->createDirs();
         $lock = $this->rootDir . 'garbage.lock';
         if (!$this->file->lockForTime($lock, $mtime)) {
-            return;
+            return false;
         }
         $this->file->cleanDir($this->rootDir . self::TTL_LONG, 500, 30 * 24 * 3600);
         $this->file->cleanDir($this->rootDir . self::TTL_SHORT, 500, 1800);
+        return true;
     }
 
     public function deleteAll()
