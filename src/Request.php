@@ -66,8 +66,8 @@ class Request
     {
         if (!empty($patterns)) {
             foreach ($patterns as $i => $path_pattern) {
-                if (!empty($path_pattern)) {
-                    $matched = fnmatch(trim($path_pattern), $this->requestURI);
+                if (!empty($path_pattern) && !empty($this->requestURI)) {
+                    $matched = fnmatch(trim($path_pattern), trim($this->requestURI));
                     if (!$matched) {
                         $matched = fnmatch(trim($path_pattern), rawurldecode($this->requestURI));
                     }
