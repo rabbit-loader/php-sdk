@@ -47,8 +47,10 @@ class Exc extends \Exception
         }
     }
 
-    public static function get()
+    public static function &getAndClean()
     {
-        return file_get_contents(self::$log, false, null, 0, 5000);
+        $data = file_get_contents(self::$log, false, null, 0, 5000);
+        self::$log->unlink();
+        return $data;
     }
 }

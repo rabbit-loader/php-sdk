@@ -8,15 +8,17 @@ class API
 
     private $host = '';
     private $licenseKey = '';
+    private $platform = [];
     private $debug = false;
 
-    public function __construct($licenseKey)
+    public function __construct($licenseKey, $platform)
     {
         $this->host = 'https://rabbitloader.com/';
         if (!empty($_ENV['RL_PHP_SDK_HOST'])) {
             $this->host = $_ENV['RL_PHP_SDK_HOST'];
         }
         $this->licenseKey = $licenseKey;
+        $this->platform = $platform;
     }
 
     /**
@@ -106,6 +108,7 @@ class API
             return;
         }
         $httpCode = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+        curl_close($ch);
         $result = json_decode($response, true);
         if ($result === null && $this->debug) {
             echo "Failed to decode JSON $response";
@@ -115,9 +118,19 @@ class API
 
     public function heartbeat()
     {
-        $data = [
-            'error_log' => Exc::get()
+        $data = $this->platform;
+        $data += [
+            'error_log' => Exc::getAndClean(),
+            'cdn_loop' > empty($_SERVER['HTTP_CDN_LOOP']) ? '' : $_SERVER['HTTP_CDN_LOOP'],
+            'server_addr' => empty($_SERVER['SERVER_ADDR']) ? '' : $_SERVER['SERVER_ADDR'],
         ];
-        //$this->remote('domain/heartbeat', $data, $result, $httpCode);
+
+        if (empty($data['cdn_loop']) && !empty($_SERVER['HTTP_INCAP_CLIENT_IP'])) {
+            $data['cdn_loop'] = 'incap';
+        }
+        if (empty($data['server_addr']) && !empty($_SERVER['LOCAL_ADDR'])) {
+            $data['server_addr'] = $_SERVER['LOCAL_ADDR'];
+        }
+        $this->remote('domain/heartbeat', $data, $result, $httpCode);
     }
 }

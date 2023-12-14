@@ -19,6 +19,7 @@ class Request
     private $purgeCallback = null;
     private $meMode = false;
     private $rlTest = false;
+    private $platform = [];
 
     private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
@@ -317,10 +318,10 @@ class Request
             return;
         }
 
-        $api = new API($this->licenseKey);
+        $api = new API($this->licenseKey, $this->platform);
         $api->setDebug($this->debug);
         $response = $api->refresh($this->cacheFile, $url, $force);
-        if ($this->cacheFile->collectGarbage(strtotime('-5 minutes'))) {
+        if ($this->cacheFile->collectGarbage(strtotime('-15 minutes'))) {
             $api->heartbeat();
         }
         if ($this->debug) {
@@ -360,5 +361,10 @@ class Request
     public function setMeMode()
     {
         return $this->meMode = true;
+    }
+
+    public function setPlatform($data)
+    {
+        return $this->platform += $data;
     }
 }

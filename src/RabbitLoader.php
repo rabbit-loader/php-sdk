@@ -154,4 +154,17 @@ class RabbitLoader
     {
         return $this->request->setMeMode();
     }
+
+    /**
+     * Set exc catch
+     */
+    public function excCatch($e, $data = [], $limit = 8)
+    {
+        Exc:: catch($e, $data, $limit);
+    }
+
+    public function setPlatform($data)
+    {
+        return $this->request->setPlatform($data);
+    }
 }

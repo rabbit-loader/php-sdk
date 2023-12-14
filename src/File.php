@@ -44,6 +44,18 @@ class File
         return $file_updated;
     }
 
+    public function unlink()
+    {
+        $file_deleted = false;
+        if ($this->debug) {
+            $file_deleted  = unlink($this->fp);
+        } else {
+            $file_deleted  = @unlink($this->fp);
+        }
+
+        return $file_deleted;
+    }
+
     public function cleanDir($dir, $max_limit, $offsetSec)
     {
         $dir = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '*';
