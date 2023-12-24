@@ -30,6 +30,9 @@ class Request
         $this->parse();
         $this->ignoreParams(self::IG_PARAMS);
         $this->cacheFile = new Cache($this->getURL(), $this->rootDir);
+        if (empty($licenseKey)) {
+            $this->ignoreRequest('disconnected');
+        }
     }
 
     public function setDebug($debug)
