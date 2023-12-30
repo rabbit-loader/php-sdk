@@ -323,10 +323,16 @@ class Request
 
         $api = new API($this->licenseKey, $this->platform);
         $api->setDebug($this->debug);
-        $response = $api->refresh($this->cacheFile, $url, $force);
+
+        //send HB before refresh to unblock previous un-installation if any
         if ($this->cacheFile->collectGarbage(strtotime('-15 minutes'))) {
+            Util::sendHeader('x-rl-hb-pre: 1', true);
             $api->heartbeat();
+            Util::sendHeader('x-rl-hb-post: 1', true);
         }
+
+        $response = $api->refresh($this->cacheFile, $url, $force);
+
         if ($this->debug) {
             $resJson = json_encode($response);
             if ($resJson) {

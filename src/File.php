@@ -80,7 +80,7 @@ class File
     public function lockForTime($fp, $mtime)
     {
         try {
-            if (file_exists($fp) && filemtime($fp) > $mtime) {
+            if (file_exists($fp) && (filemtime($fp) > $mtime)) {
                 return false;
             }
             return $this->lock($fp);
@@ -125,5 +125,10 @@ class File
         $fi = new \FilesystemIterator($dir, \FilesystemIterator::SKIP_DOTS);
         $fcount = iterator_count($fi) / 2; ///2 cause content and header
         return round($fcount);
+    }
+
+    public function fgc($length = 5000)
+    {
+        return file_get_contents($this->fp, false, null, 0, $length);
     }
 }

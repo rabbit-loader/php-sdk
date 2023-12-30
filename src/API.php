@@ -3,6 +3,8 @@
 
 namespace RabbitLoader\SDK;
 
+use Exception;
+
 class API
 {
 
@@ -118,19 +120,28 @@ class API
 
     public function heartbeat()
     {
-        $data = $this->platform;
-        $data += [
-            'error_log' => Exc::getAndClean(),
-            'cdn_loop' > empty($_SERVER['HTTP_CDN_LOOP']) ? '' : $_SERVER['HTTP_CDN_LOOP'],
-            'server_addr' => empty($_SERVER['SERVER_ADDR']) ? '' : $_SERVER['SERVER_ADDR'],
-        ];
+        try {
+            $data = $this->platform;
+            $data += [
+                'error_log' => Exc::getAndClean(),
+                'cdn_loop' => empty($_SERVER['HTTP_CDN_LOOP']) ? '' : $_SERVER['HTTP_CDN_LOOP'],
+                'server_addr' => empty($_SERVER['SERVER_ADDR']) ? '' : $_SERVER['SERVER_ADDR'],
+            ];
 
-        if (empty($data['cdn_loop']) && !empty($_SERVER['HTTP_INCAP_CLIENT_IP'])) {
-            $data['cdn_loop'] = 'incap';
+            if (empty($data['cdn_loop']) && !empty($_SERVER['HTTP_INCAP_CLIENT_IP'])) {
+                $data['cdn_loop'] = 'incap';
+            }
+            if (empty($data['server_addr']) && !empty($_SERVER['LOCAL_ADDR'])) {
+                $data['server_addr'] = $_SERVER['LOCAL_ADDR'];
+            }
+            $this->remote('domain/heartbeat', $data, $result, $httpCode);
+            Util::sendHeader('x-rl-hb-code: ' . $httpCode, true);
+        } catch (\Throwable $e) {
+            Exc:: catch($e);
+            Util::sendHeader('x-rl-hb-thro: ' . $e->getMessage() . ':' . $e->getLine(), true);
+        } catch (\Exception $e) {
+            Exc:: catch($e);
+            Util::sendHeader('x-rl-hb-exc: ' . $e->getMessage() . ':' . $e->getLine(), true);
         }
-        if (empty($data['server_addr']) && !empty($_SERVER['LOCAL_ADDR'])) {
-            $data['server_addr'] = $_SERVER['LOCAL_ADDR'];
-        }
-        $this->remote('domain/heartbeat', $data, $result, $httpCode);
     }
 }
