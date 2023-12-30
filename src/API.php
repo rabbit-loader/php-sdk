@@ -3,8 +3,6 @@
 
 namespace RabbitLoader\SDK;
 
-use Exception;
-
 class API
 {
 
