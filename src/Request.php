@@ -315,9 +315,7 @@ class Request
     private function refresh($url, $force)
     {
         if ($this->cacheFile->get429()) {
-            if ($this->debug) {
-                Util::sendHeader('x-rl-429: 1', true);
-            }
+            Util::sendHeader('x-rl-429: 1', true);
             return;
         }
 
@@ -333,14 +331,13 @@ class Request
 
         $response = $api->refresh($this->cacheFile, $url, $force);
 
-        if ($this->debug) {
-            $resJson = json_encode($response);
-            if ($resJson) {
-                Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
-            } else {
-                Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
-            }
+        $resJson = json_encode($response);
+        if ($resJson) {
+            Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
+        } else {
+            Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
         }
+
         if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
         } else {
