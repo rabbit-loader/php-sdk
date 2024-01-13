@@ -1,5 +1,17 @@
-# RabbitLoader PHP SDK (Beta)
+# RabbitLoader PHP SDK
 RabbitLoader PHP SDK can be used to speed up any website that is built using core PHP or frameworks.
+
+# Highlights
+
+* 🚀 Boost PageSpeed Insights Score for all pages of the custom developed website
+* 🏗️ Automatically reduce image size by ~40% by converting to NextGen AVIF and WebP formats
+* ➰ Lazy load below-the-fold images and YouTube videos
+* 📱 Reduce CSS size by 98% automatically by generating critical-css for fastest rendering of the webpage
+* ✨ Improve all Core Web Vitals metrics (lower FCP, FID, and CLS)
+* ⚡️ Higher rankings on Google Search and better conversions due to page speed optimization and healthy Core Web Vitals metrics
+* 🌐 Cache and serve static assets (CSS/JS/Images) via inbuilt premium CDN
+* ♾️ HTTP/3 Full request and response multiplexing of static assets
+* 🗜️ Use Brotli compression for static assets transfer and loading
 
 # Installation
 
