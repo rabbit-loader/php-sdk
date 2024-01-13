@@ -129,6 +129,9 @@ class File
 
     public function fgc($length = 5000)
     {
+        if (empty($this->fp) || !file_exists($this->fp)) {
+            return '';
+        }
         return file_get_contents($this->fp, false, null, 0, $length);
     }
 }
