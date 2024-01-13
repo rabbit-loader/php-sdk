@@ -332,7 +332,7 @@ class Request
         $response = $api->refresh($this->cacheFile, $url, $force);
 
         $resJson = json_encode($response);
-        if ($resJson) {
+        if (!$resJson) {
             Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
         } else {
             Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
@@ -340,10 +340,14 @@ class Request
 
         if (!empty($response['saved']) && !empty($this->purgeCallback)) {
             call_user_func_array($this->purgeCallback, [$url]);
+            Util::sendHeader('x-rl-refresh-saved: 1', true);
         } else {
             $this->cacheFile->set429();
-            if (!empty($response['message']) && strcasecmp($response['message'], 'BQE') === 0) {
-                $this->cacheFile->deleteAll();
+            if (!empty($response['message'])) {
+                Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
+                if (strcasecmp($response['message'], 'BQE') === 0) {
+                    $this->cacheFile->deleteAll();
+                }
             }
         }
         exit;

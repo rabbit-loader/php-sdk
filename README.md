@@ -4,7 +4,7 @@ RabbitLoader PHP SDK can be used to speed up any website that is built using cor
 # Installation
 
 ```bash
-composer install rabbit-loader/php-sdk
+composer require rabbit-loader/php-sdk
 ```
 
 # Example
