@@ -48,6 +48,8 @@ class Request
 
     public function ignoreRequest($reason = 'default')
     {
+        //replace newlines form reason text to avoid issues in appendFooter
+        $reason = str_replace(array("\n", "\r"), '', $reason);
         $this->ignoreRead = true;
         $this->ignoreWrite = true;
         $this->ignoreReason = $reason;
