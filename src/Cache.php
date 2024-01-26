@@ -5,8 +5,8 @@ namespace RabbitLoader\SDK;
 class Cache
 {
 
-    public const TTL_LONG = "long";
-    public const TTL_SHORT = "short";
+    const TTL_LONG = "long";
+    const TTL_SHORT = "short";
 
     private $request_url = '';
     private $fp_long = '';

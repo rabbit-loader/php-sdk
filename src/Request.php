@@ -21,7 +21,7 @@ class Request
     private $rlTest = false;
     private $platform = [];
 
-    private const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
+    const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
     public function __construct($licenseKey, $rootDir)
     {
@@ -334,9 +334,11 @@ class Request
         $response = $api->refresh($this->cacheFile, $url, $force);
 
         $resJson = json_encode($response);
-        if (!$resJson) {
+        if ($resJson) {
+            //print resJson string if encode success
             Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
         } else {
+            //print raw response if encode fails
             Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
         }
 
