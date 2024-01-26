@@ -4,6 +4,9 @@ namespace RabbitLoader\SDK;
 
 class Util
 {
+    //count of headers sent so far by RabbitLoader
+    private static $sentCount = 0;
+
     public static function getRequestMethod()
     {
         return empty($_SERVER['REQUEST_METHOD']) ? '' : strtolower($_SERVER['REQUEST_METHOD']);
@@ -11,8 +14,9 @@ class Util
 
     public static function sendHeader($header, $replace)
     {
-        if (!headers_sent()) {
-            header($header, $replace);
+        if (!empty($header) && (self::$sentCount < 50) && !headers_sent()) {
+            header(substr($header, 0, 150), $replace);
+            self::$sentCount++;
         }
     }
 

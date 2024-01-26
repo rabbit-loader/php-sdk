@@ -73,7 +73,7 @@ class Cache
 
     private function getPathForTTL($ttl, $fileType)
     {
-        return $ttl == self::TTL_LONG ? $this->fp_long . '_' . $fileType : $this->fp_short . '_' . $fileType;
+        return $ttl === self::TTL_LONG ? $this->fp_long . '_' . $fileType : $this->fp_short . '_' . $fileType;
     }
 
     public function exists($ttl)
