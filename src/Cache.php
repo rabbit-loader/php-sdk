@@ -48,11 +48,13 @@ class Cache
         if (!is_dir($rootDir . self::TTL_LONG)) {
             if (!mkdir($rootDir . self::TTL_LONG, 0775, true)) {
                 error_log("rabbitloader failed to create cache directory inside " . $rootDir);
+                Util::sendHeader('x-rl-create-dirs: failed', true);
             }
         }
         if (!is_dir($rootDir . self::TTL_SHORT)) {
             if (!mkdir($rootDir . self::TTL_SHORT, 0775, true)) {
                 error_log("rabbitloader failed to create cache directory inside " . $rootDir);
+                Util::sendHeader('x-rl-create-dirs: failed', true);
             } else {
                 //directory created successfully
                 $this->addHtaccess();
@@ -184,6 +186,7 @@ class Cache
     {
         $count = 0;
         if (!$this->valid($content)) {
+            Util::sendHeader('x-rl-save: invalid-' . $ttl, true);
             return $count;
         }
         $this->createDirs();
