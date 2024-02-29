@@ -65,8 +65,8 @@ $rlSDK->process();
 ```
 
 
-# License Key
-A license key is required to run the SDK. This guide explains [how to get the license key](https://rabbitloader.com/kb/setting-up-rabbitloader-on-custom-php-website/).
+# More Samples and License Key
+A license key is required to run the SDK. This guide has more code samples and explains [how to get the license key](https://rabbitloader.com/kb/setting-up-rabbitloader-on-custom-php-website/).
 
 # Support
 [Contact RabbitLoader team here](https://rabbitloader.local/contact/).
