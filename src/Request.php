@@ -134,7 +134,7 @@ class Request
             parse_str($qspart, $qsvars);
 
             $varsLenO = count($qsvars);
-            if (isset($qsvars['rl-no-optimization'])) {
+            if (isset($qsvars['rl-no-optimization']) || isset($_SERVER['HTTP_RL_NO_OPTIMIZATION']) || isset($_SERVER['HTTP_RL_CSS'])) {
                 unset($qsvars['rl-no-optimization']);
                 $this->isNoOptimization = true;
                 $this->ignoreRequest("no-optimization");
