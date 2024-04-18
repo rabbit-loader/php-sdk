@@ -19,7 +19,9 @@ class Request
     private $purgeCallback = null;
     private $meMode = false;
     private $rlTest = false;
-    private $platform = [];
+    private $platform = [
+        'plugin_cms' => 'php-sdk',
+    ];
 
     const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
@@ -113,7 +115,7 @@ class Request
                 $scheme = trim(@$parsed_url['scheme']);
                 $this->requestURL = $scheme . '://' . $host . $this->requestURI;
             } catch (\Throwable $e) {
-                Exc:: catch($e);
+                Exc::catch($e);
             }
         }
     }
@@ -178,17 +180,26 @@ class Request
                 $_SERVER['REQUEST_URI'] = $urlpart . (empty($newqs) ?  '' : '?' . $newqs);
             }
         }
-        $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
-        $http_host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        $http_host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
         $raw_link = ($this->isHTTPS() ? "https" : "http") . "://$http_host$request_uri";
 
         $parsed_url = parse_url($raw_link);
         $query = empty($parsed_url['query']) ? '' : trim($parsed_url['query']);
 
-        $this->requestURI = trim(@$parsed_url['path']) . (empty($query) ? '' : '?' . $query);;
-        $host = trim(@$parsed_url['host']);
-        $scheme = trim(@$parsed_url['scheme']);
+        if (empty($parsed_url['path'])) {
+            $parsed_url['path'] = '';
+        }
+        if (empty($parsed_url['host'])) {
+            $parsed_url['host'] = 'localhost';
+        }
+        if (empty($parsed_url['scheme'])) {
+            $parsed_url['scheme'] = '';
+        }
+        $this->requestURI = trim($parsed_url['path']) . (empty($query) ? '' : '?' . $query);;
+        $host = trim($parsed_url['host']);
+        $scheme = trim($parsed_url['scheme']);
         $this->requestURL  = $scheme . '://' . $host . $this->requestURI;
     }
 
@@ -283,12 +294,12 @@ class Request
                 if ($this->debug) {
                     $buffer = $e->getMessage();
                 }
-                Exc:: catch($e);
+                Exc::catch($e);
             } catch (\Exception $e) {
                 if ($this->debug) {
                     $buffer = $e->getMessage();
                 }
-                Exc:: catch($e);
+                Exc::catch($e);
             }
         }
         return $buffer;
@@ -308,9 +319,9 @@ class Request
         try {
             $this->serve();
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         } catch (\Exception $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         }
     }
 
