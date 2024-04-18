@@ -182,7 +182,11 @@ class Request
         }
         $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
-        $http_host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        $http_host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        if (empty($http_host)) {
+            $http_host = 'localhost';
+            $this->ignoreRequest("missing-host");
+        }
         $raw_link = ($this->isHTTPS() ? "https" : "http") . "://$http_host$request_uri";
 
         $parsed_url = parse_url($raw_link);
