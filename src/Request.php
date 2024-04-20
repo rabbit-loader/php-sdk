@@ -19,9 +19,7 @@ class Request
     private $purgeCallback = null;
     private $meMode = false;
     private $rlTest = false;
-    private $platform = [
-        'plugin_cms' => 'php-sdk',
-    ];
+    private $platform = [];
 
     const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
@@ -35,6 +33,12 @@ class Request
         if (empty($licenseKey)) {
             $this->ignoreRequest('disconnected');
         }
+
+        $this->platform = [
+            'plugin_cms' => 'php-sdk',
+            'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
+            'plugin_v' => '1.0.6'
+        ];
     }
 
     public function setDebug($debug)
@@ -394,6 +398,11 @@ class Request
 
     public function setPlatform($data)
     {
-        return $this->platform += $data;
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
+                $this->platform[$key] = $val;
+            }
+        }
+        return;
     }
 }
