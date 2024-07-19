@@ -37,7 +37,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.6'
+            'plugin_v' => '1.0.7'
         ];
     }
 
@@ -361,8 +361,10 @@ class Request
             Util::sendHeader('x-rl-debug-refresh2:' . $response, true);
         }
 
-        if (!empty($response['saved']) && !empty($this->purgeCallback)) {
-            call_user_func_array($this->purgeCallback, [$url]);
+        if (!empty($response['saved'])) {
+            if (!empty($this->purgeCallback)) {
+                call_user_func_array($this->purgeCallback, [$url]);
+            }
             Util::sendHeader('x-rl-refresh-saved: 1', true);
         } else {
             $this->cacheFile->set429();
