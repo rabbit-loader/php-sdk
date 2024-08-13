@@ -37,7 +37,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.7'
+            'plugin_v' => '1.0.8'
         ];
     }
 

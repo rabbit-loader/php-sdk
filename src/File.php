@@ -47,6 +47,9 @@ class File
     public function unlink()
     {
         $file_deleted = false;
+        if (!file_exists($this->fp)) {
+            return true;
+        }
         if ($this->debug) {
             $file_deleted  = unlink($this->fp);
         } else {
@@ -85,9 +88,9 @@ class File
             }
             return $this->lock($fp);
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         } catch (\Exception $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         }
     }
 
@@ -96,9 +99,9 @@ class File
         try {
             return touch($fp);
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         } catch (\Exception $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         }
     }
 
@@ -110,9 +113,9 @@ class File
             }
             return false;
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         } catch (\Exception $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         }
         return false;
     }
