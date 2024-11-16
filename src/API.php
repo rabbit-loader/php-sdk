@@ -57,8 +57,12 @@ class API
             $fields = [
                 'url_b64' => base64_encode($url),
                 'html' => $html,
-                'headers' => $headers
+                'headers' => $headers,
+                'plugins' => []
             ];
+            if (WordPress::isWp()) {
+                $fields['plugins'] = WordPress::plugins();
+            }
             $this->remote('page/get_cache', $fields, $result, $httpCode);
             if (!empty($result['data']['html'])) {
                 $response['saved'] = $cf->save(Cache::TTL_LONG, $result['data']['html'], $result['data']['headers']);
@@ -67,7 +71,7 @@ class API
                 $response = $result;
             }
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
         }
         if ($this->debug) {
             Util::sendHeader('x-rl-refresh: finish', true);
@@ -135,10 +139,10 @@ class API
             $this->remote('domain/heartbeat', $data, $result, $httpCode);
             Util::sendHeader('x-rl-hb-code: ' . $httpCode, true);
         } catch (\Throwable $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
             Util::sendHeader('x-rl-hb-thro: ' . $e->getMessage() . ':' . $e->getLine(), true);
         } catch (\Exception $e) {
-            Exc:: catch($e);
+            Exc::catch($e);
             Util::sendHeader('x-rl-hb-exc: ' . $e->getMessage() . ':' . $e->getLine(), true);
         }
     }
