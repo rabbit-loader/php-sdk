@@ -21,6 +21,8 @@ class Request
     private $rlTest = false;
     private $platform = [];
 
+    const EC429 = ['BQE', 'EC224', 'EC230', 'EC232'];
+
     const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
     public function __construct($licenseKey, $rootDir)
@@ -37,7 +39,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.9'
+            'plugin_v' => '1.0.10'
         ];
     }
 
@@ -367,12 +369,16 @@ class Request
             }
             Util::sendHeader('x-rl-refresh-saved: 1', true);
         } else {
-            $this->cacheFile->set429();
             if (!empty($response['message'])) {
                 Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
-                if (strcasecmp($response['message'], 'BQE') === 0) {
+                if (in_array($response['message'], self::EC429)) {
+                    $this->cacheFile->set429();
+                }
+                if ($response['message'] === 'BQE' || $response['message'] === 'EC224') {
                     $this->cacheFile->deleteAll();
                 }
+            } else {
+                Util::sendHeader('x-rl-res-msg-empty: 1', true);
             }
         }
         exit;
