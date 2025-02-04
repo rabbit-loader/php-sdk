@@ -39,7 +39,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.10'
+            'plugin_v' => '1.0.11'
         ];
     }
 
@@ -78,21 +78,22 @@ class Request
 
     public function skipForPaths($patterns)
     {
-        if (!empty($patterns)) {
-            foreach ($patterns as $i => $path_pattern) {
-                if (!empty($path_pattern) && !empty($this->requestURI)) {
-                    $matched = fnmatch(trim($path_pattern), trim($this->requestURI));
-                    if (!$matched) {
-                        $matched = fnmatch(trim($path_pattern), rawurldecode($this->requestURI));
-                    }
-                    if (!$matched) {
-                        $matched = fnmatch($path_pattern, rawurldecode($this->requestURI));
-                    }
-                    if ($matched) {
-                        $this->ignoreRequest("skip-path-$path_pattern");
-                        break;
-                    }
-                }
+        if (empty($patterns) || empty($this->requestURI)) {
+            return;
+        }
+        #fnmatch(): the maximum allowed length for filename is 4096 characters
+        $uriRaw = substr($this->requestURI, 0, 4096);
+        $uriDecoded = substr(rawurldecode($this->requestURI), 0, 4096);
+
+        foreach ($patterns as $path_pattern) {
+            if (empty($path_pattern)) {
+                continue;
+            }
+
+            $path_pattern = trim($path_pattern);
+            if (fnmatch($path_pattern, $uriRaw) || fnmatch($path_pattern, $uriDecoded)) {
+                $this->ignoreRequest("skip-path-$path_pattern");
+                break;
             }
         }
     }
