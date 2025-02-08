@@ -371,7 +371,7 @@ class Request
             Util::sendHeader('x-rl-refresh-saved: 1', true);
         } else {
             if (!empty($response['message'])) {
-                Util::sendHeader('x-rl-debug-refresh1:' . $resJson, true);
+                Util::sendHeader('x-rl-debug-refresh3:' . $resJson, true);
                 if (in_array($response['message'], self::EC429)) {
                     $this->cacheFile->set429();
                 }

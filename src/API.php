@@ -37,6 +37,7 @@ class API
         $response = [
             'url' => $url
         ];
+        $httpCode = 0;
         try {
             if (!$cf->exists(Cache::TTL_SHORT)) {
                 $response['short_missing'] = true;
@@ -75,6 +76,7 @@ class API
         }
         if ($this->debug) {
             Util::sendHeader('x-rl-refresh: finish', true);
+            Util::sendHeader('x-rl-httpCode: ' . $httpCode, true);
         }
         return $response;
     }
