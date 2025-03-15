@@ -13,7 +13,7 @@ class API
 
     public function __construct($licenseKey, $platform)
     {
-        $this->host = 'https://rabbitloader.com/';
+        $this->host = 'https://api-v1.rabbitloader.com/';
         if (!empty($_ENV['RL_PHP_SDK_HOST'])) {
             $this->host = $_ENV['RL_PHP_SDK_HOST'];
         }
