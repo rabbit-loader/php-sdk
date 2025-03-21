@@ -39,7 +39,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.12'
+            'plugin_v' => '1.0.13'
         ];
     }
 
@@ -353,7 +353,7 @@ class Request
             Util::sendHeader('x-rl-hb-post: 1', true);
         }
 
-        $response = $api->refresh($this->cacheFile, $url, $force);
+        $response = $api->refreshV2($this->cacheFile, $url, $force);
 
         $resJson = json_encode($response);
         if ($resJson) {
