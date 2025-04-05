@@ -194,7 +194,7 @@ class API
             if (empty($result['error']) && !empty($result['html'])) {
                 $response['saved'] = $cf->save(Cache::TTL_LONG, $result['html'], $result['headers']);
                 $response['deleted'] = $cf->delete(Cache::TTL_SHORT);
-            } else {
+            } else if (isset($result['error'])) {
                 $response = $result;
                 Util::sendHeader('x-rl-ble: ' . $result['error'], true);
             }
