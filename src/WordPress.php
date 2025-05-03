@@ -25,6 +25,11 @@ class WordPress
         if (class_exists('RankMath') || in_array('seo-by-rank-math/rank-math.php', $activePlugins)) {
             $plugins[] = "seo-by-rank-math";
         }
+
+        //SEO Plugin by Squirrly SEO
+        if (class_exists('SQ_Classes_Helpers_Tools') || in_array('squirrly-seo/squirrly.php', $activePlugins)) {
+            $plugins[] = "squirrly-seo";
+        }
         return $plugins;
     }
 }
