@@ -11,6 +11,7 @@ class API
     private $licenseKey = '';
     private $platform = [];
     private $debug = false;
+    private $unauthorizedCallback = null;
 
     public function __construct($licenseKey, $platform)
     {
@@ -30,6 +31,11 @@ class API
     public function setDebug($debug)
     {
         $this->debug = $debug;
+    }
+
+    public function registerUnauthorizedCallback($cb)
+    {
+        $this->unauthorizedCallback = $cb;
     }
 
     public function refreshV1(Cache $cf, $url, $force)
@@ -122,6 +128,10 @@ class API
         if ($result === null && $this->debug) {
             echo "Failed to decode JSON $response";
         }
+
+        if (in_array($httpCode, [401, 403]) && !empty($this->unauthorizedCallback)) {
+            call_user_func_array($this->unauthorizedCallback, [$httpCode]);
+        }
         return true;
     }
 
@@ -159,9 +169,10 @@ class API
             Util::sendHeader('x-rl-refresh: start', true);
         }
         $response = [
-            'url' => $url
+            'url' => $url,
+            'status_code' => 0,
         ];
-        $httpCode = 0;
+
         try {
             if (!$cf->exists(Cache::TTL_SHORT)) {
                 $response['short_missing'] = true;
@@ -190,12 +201,12 @@ class API
                 $fields['plugins'] = WordPress::plugins();
             }
             $errMsg = '';
-            $this->remoteV2("url/domain/defaultdid/page/optimize", $fields, $result, $httpCode, $errMsg);
+            $this->remoteV2("url/domain/defaultdid/page/optimize", $fields, $result, $response['status_code'], $errMsg);
             if (empty($result['error']) && !empty($result['html'])) {
                 $response['saved'] = $cf->save(Cache::TTL_LONG, $result['html'], $result['headers']);
                 $response['deleted'] = $cf->delete(Cache::TTL_SHORT);
             } else if (isset($result['error'])) {
-                $response = $result;
+                $response['error'] = $result['error'];
                 Util::sendHeader('x-rl-ble: ' . $result['error'], true);
             }
             if ($errMsg) {
@@ -206,7 +217,7 @@ class API
         }
         if ($this->debug) {
             Util::sendHeader('x-rl-refresh: finish', true);
-            Util::sendHeader('x-rl-httpCode: ' . $httpCode, true);
+            Util::sendHeader('x-rl-httpCode: ' . $response['status_code'], true);
         }
         return $response;
     }
@@ -259,6 +270,10 @@ class API
                 $errMsg = 'b.' . json_last_error_msg();
                 Util::sendHeader('x-rl-http-raw-res: ' . substr($response, 0, 15), true);
             }
+        }
+
+        if (in_array($httpCode, [401, 403]) && !empty($this->unauthorizedCallback)) {
+            call_user_func_array($this->unauthorizedCallback, [$httpCode]);
         }
         return true;
     }

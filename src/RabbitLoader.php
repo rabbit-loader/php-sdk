@@ -97,6 +97,15 @@ class RabbitLoader
     }
 
     /**
+     * Register a callback to be called when RabbitLoader detects a 401/403 Unauthorized response
+     * Example - $cb = function($url, $response){...}
+     */
+    public function registerUnauthorizedCallback($cb)
+    {
+        $this->request->registerUnauthorizedCallback($cb);
+    }
+
+    /**
      * Delete cached file if exists for a given URL
      * @return int deleted cache count
      */
@@ -160,7 +169,7 @@ class RabbitLoader
      */
     public function excCatch($e, $data = [], $limit = 8)
     {
-        Exc:: catch($e, $data, $limit);
+        Exc::catch($e, $data, $limit);
     }
 
     public function setPlatform($data)
