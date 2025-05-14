@@ -17,11 +17,13 @@ class Request
     private $isWarmup = false;
     private $onlyAfter = 0;
     private $purgeCallback = null;
+    private $unauthorizedCallback = null;
     private $meMode = false;
     private $rlTest = false;
     private $platform = [];
 
-    const EC429 = ['BQE', 'EC224', 'EC230', 'EC232'];
+    //const EC429V1 = ['BQE', 'EC224', 'EC230', 'EC232'];
+    const EC429V2 = [101, 106, 107, 109];
 
     const IG_PARAMS = ['_gl', 'epik', 'fbclid', 'gbraid', 'gclid', 'msclkid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'vgo_ee', 'wbraid', 'zenid', 'rltest', 'rlrand'];
 
@@ -39,7 +41,7 @@ class Request
         $this->platform = [
             'plugin_cms' => 'php-sdk',
             'cms_v' => defined('PHP_VERSION') ? PHP_VERSION : '',
-            'plugin_v' => '1.0.15'
+            'plugin_v' => '1.0.16'
         ];
     }
 
@@ -345,6 +347,7 @@ class Request
 
         $api = new API($this->licenseKey, $this->platform);
         $api->setDebug($this->debug);
+        $api->registerUnauthorizedCallback($this->unauthorizedCallback);
 
         //send HB before refresh to unblock previous un-installation if any
         if ($this->cacheFile->collectGarbage(strtotime('-15 minutes'))) {
@@ -370,14 +373,19 @@ class Request
             }
             Util::sendHeader('x-rl-refresh-saved: 1', true);
         } else {
-            if (!empty($response['message'])) {
+            if (!empty($response['error'])) {
                 Util::sendHeader('x-rl-debug-refresh3:' . $resJson, true);
-                if (in_array($response['message'], self::EC429)) {
+                if (in_array($response['error'], self::EC429V2)) {
                     $this->cacheFile->set429();
                 }
-                if ($response['message'] === 'BQE' || $response['message'] === 'EC224') {
+                if ($response['error'] === 101) {
+                    //rebuild cache
                     $this->cacheFile->deleteAll();
                 }
+            } else if ($response['status_code'] == 401 || $response['status_code'] == 403) {
+                $this->cacheFile->deleteAll();
+            } else if ($this->debug) {
+                Util::sendHeader('x-rl-debug-refresh5:' . $resJson, true);
             } else {
                 Util::sendHeader('x-rl-res-msg-empty: 1', true);
             }
@@ -398,6 +406,11 @@ class Request
     public function registerPurgeCallback($cb)
     {
         $this->purgeCallback = $cb;
+    }
+
+    public function registerUnauthorizedCallback($cb)
+    {
+        $this->unauthorizedCallback = $cb;
     }
 
     public function setMeMode()
